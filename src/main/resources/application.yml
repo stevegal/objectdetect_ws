@@ -1,0 +1,4 @@
+server:
+  port: 9000
+tensor:
+  modelPath: frozen_inference_graph.pb
