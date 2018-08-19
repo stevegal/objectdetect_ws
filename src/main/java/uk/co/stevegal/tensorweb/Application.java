@@ -5,10 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.FileCopyUtils;
 import org.tensorflow.Graph;
+import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
+import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 
-import javax.annotation.PreDestroy;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -28,9 +29,14 @@ public class Application {
   @Bean
   public Graph objectGraph(@Value("${tensor.modelpath}") String path) throws IOException {
     Graph graph = new Graph();
-    graph.importGraphDef(Files.readAllBytes(new ClassPathResource(path).getFile().toPath()));
-
+    ClassPathResource cpr = new ClassPathResource(path);
+    graph.importGraphDef(FileCopyUtils.copyToByteArray(cpr.getInputStream()));
     return graph;
+  }
+
+  @Bean
+  public ImageEvaluator machineEvaluator(Graph graph) {
+    return new TensorflowImageEvaluator(graph);
   }
 
 }
