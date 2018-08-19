@@ -14,19 +14,21 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by stevegal on 18/08/2018.
  */
 public class TensorflowImageEvaluator implements ImageEvaluator {
   private Graph graph;
-  private StringIntLabelMapOuterClass.StringIntLabelMap map;
+  private Map<Integer,String> map;
   final long BATCH_SIZE = 1;
   final long CHANNELS = 3;
 
   public TensorflowImageEvaluator(Graph graph, StringIntLabelMapOuterClass.StringIntLabelMap map) {
     this.graph = graph;
-    this.map = map;
+    this.map = map.getItemList().stream().collect(Collectors.toMap(StringIntLabelMapOuterClass.StringIntLabelMapItem::getId, item-> item.getDisplayName()));
   }
 
   @Override
@@ -61,8 +63,8 @@ public class TensorflowImageEvaluator implements ImageEvaluator {
       float[][] boxes = boxesT.copyTo(new float[1][maxObjects][4])[0];
 
       for (int i=0;i<maxObjects;i++) {
-        StringIntLabelMapOuterClass.StringIntLabelMapItem labelMapItem = map.getItem((int) classes[i]);
-        resultsBuilder.result(PredictionResult.newBuilder().confidence(scores[i]).label(labelMapItem.getDisplayName()).build());
+        String label = map.get(Integer.valueOf((int) classes[i]));
+        resultsBuilder.result(PredictionResult.newBuilder().confidence(scores[i]).label(label).boundingBox(boxes[i]).build());
       }
     }
     return resultsBuilder.build();

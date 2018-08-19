@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,12 +22,14 @@ import java.util.stream.Collectors;
 public class TensorWebController {
 
   private ImageEvaluator evaluator;
+  private ImageResultCreator imageResultCreator;
   private float confidence;
 
 
   @Autowired
-  public TensorWebController(ImageEvaluator evaluator, @Value("${tensor.confidenceLimit}") float confidence) {
+  public TensorWebController(ImageEvaluator evaluator, ImageResultCreator imageResultCreator,@Value("${tensor.confidenceLimit}") float confidence) {
     this.evaluator = evaluator;
+    this.imageResultCreator = imageResultCreator;
     this.confidence = confidence;
   }
 
@@ -36,7 +39,8 @@ public class TensorWebController {
     List<PredictionResult> predictionResults = unfilteredResults.asStream()
         .filter(item -> item.getConfidence() > confidence)
         .collect(Collectors.toList());
-    return PredictionResults.newBuilder().results(predictionResults).build();
+    String encodedImage = imageResultCreator.createResultImage(file.getBytes(),predictionResults);
+    return PredictionResults.newBuilder().results(predictionResults).image(encodedImage).build();
   }
 
 }

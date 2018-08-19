@@ -11,6 +11,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 import org.tensorflow.Graph;
 import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
+import uk.co.stevegal.tensorweb.controller.ImageResultCreator;
+import uk.co.stevegal.tensorweb.controller.ImageResultCreatorImpl;
 import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 
 import java.io.IOException;
@@ -50,6 +52,11 @@ public class Application {
     InputStreamReader reader = new InputStreamReader(cpr.getInputStream(),"ASCII");
     TextFormat.merge(reader,builder);
     return builder.build();
+  }
+
+  @Bean
+  public ImageResultCreator imageResultCreator(){
+    return new ImageResultCreatorImpl();
   }
 
 }
