@@ -1,7 +1,6 @@
 package uk.co.stevegal.tensorweb;
 
 import com.google.protobuf.TextFormat;
-import com.sun.xml.internal.fastinfoset.util.StringIntMap;
 import object_detection.protos.StringIntLabelMapOuterClass;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -9,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.util.FileCopyUtils;
 import org.tensorflow.Graph;
 import org.thymeleaf.TemplateEngine;
@@ -21,7 +19,6 @@ import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 
 /**
  * Created by stevegal on 18/08/2018.
