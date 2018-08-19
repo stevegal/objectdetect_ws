@@ -20,6 +20,7 @@ protoc object_detection/protos/*.proto --java_out=${yourprojectroot}/src/main/ja
 ```
 
 ### TODO
- - [ ] generate output image with bounding boxes
- - [ ] add results threshold
- - [ ] convert label if to display text 
+ - [x] generate output image with bounding boxes
+ - [x] add results threshold
+ - [x] convert label if to display text
+ - [ ] allow colours etc for bounding boxes
