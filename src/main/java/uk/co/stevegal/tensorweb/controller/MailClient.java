@@ -27,7 +27,7 @@ public class MailClient {
   public void sendResultsTo(String mailTo, PredictionResults results) {
     MimeMessagePreparator messagePreparator = mimeMessage -> {
       MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-      messageHelper.setFrom("stevegal.com");
+      messageHelper.setFrom(mailTo);
       messageHelper.setTo(mailTo);
       messageHelper.setSubject("Something detected");
       Context context = new Context();
