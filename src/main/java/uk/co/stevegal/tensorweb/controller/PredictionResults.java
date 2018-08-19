@@ -3,6 +3,7 @@ package uk.co.stevegal.tensorweb.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by stevegal on 18/08/2018.
@@ -11,6 +12,10 @@ public class PredictionResults {
 
   private PredictionResults(PredictionResultsBuilder builder) {
     this.results = Collections.unmodifiableList(builder.results);
+  }
+
+  public Stream<PredictionResult> asStream(){
+    return this.results.stream();
   }
 
   private List<PredictionResult> results;
@@ -35,6 +40,11 @@ public class PredictionResults {
 
     public PredictionResults build(){
       return new PredictionResults(this);
+    }
+
+    public PredictionResultsBuilder results(List<PredictionResult> predictionResults) {
+      this.results.addAll(predictionResults);
+      return this;
     }
   }
 }

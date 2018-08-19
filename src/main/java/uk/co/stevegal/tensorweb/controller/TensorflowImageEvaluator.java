@@ -1,5 +1,6 @@
 package uk.co.stevegal.tensorweb.controller;
 
+import object_detection.protos.StringIntLabelMapOuterClass;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
@@ -19,11 +20,13 @@ import java.util.List;
  */
 public class TensorflowImageEvaluator implements ImageEvaluator {
   private Graph graph;
+  private StringIntLabelMapOuterClass.StringIntLabelMap map;
   final long BATCH_SIZE = 1;
   final long CHANNELS = 3;
 
-  public TensorflowImageEvaluator(Graph graph) {
+  public TensorflowImageEvaluator(Graph graph, StringIntLabelMapOuterClass.StringIntLabelMap map) {
     this.graph = graph;
+    this.map = map;
   }
 
   @Override
@@ -58,7 +61,8 @@ public class TensorflowImageEvaluator implements ImageEvaluator {
       float[][] boxes = boxesT.copyTo(new float[1][maxObjects][4])[0];
 
       for (int i=0;i<maxObjects;i++) {
-        resultsBuilder.result(PredictionResult.newBuilder().confidence(scores[i]).label(Float.toString(classes[i])).build());
+        StringIntLabelMapOuterClass.StringIntLabelMapItem labelMapItem = map.getItem((int) classes[i]);
+        resultsBuilder.result(PredictionResult.newBuilder().confidence(scores[i]).label(labelMapItem.getDisplayName()).build());
       }
     }
     return resultsBuilder.build();

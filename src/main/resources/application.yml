@@ -5,4 +5,6 @@ spring:
     multipart:
       max-file-size: 2MB
 tensor:
+  labelPath: mscoco_label_map.pbtxt
   modelPath: frozen_inference_graph.pb
+  confidenceLimit: 0.2

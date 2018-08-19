@@ -1,5 +1,8 @@
 package uk.co.stevegal.tensorweb;
 
+import com.google.protobuf.TextFormat;
+import com.sun.xml.internal.fastinfoset.util.StringIntMap;
+import object_detection.protos.StringIntLabelMapOuterClass;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +14,7 @@ import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
 import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 
 /**
@@ -35,8 +39,17 @@ public class Application {
   }
 
   @Bean
-  public ImageEvaluator machineEvaluator(Graph graph) {
-    return new TensorflowImageEvaluator(graph);
+  public ImageEvaluator machineEvaluator(Graph graph, StringIntLabelMapOuterClass.StringIntLabelMap map) {
+    return new TensorflowImageEvaluator(graph, map);
+  }
+
+  @Bean
+  public StringIntLabelMapOuterClass.StringIntLabelMap mapFrom(@Value("${tensor.labelPath}") String path) throws IOException {
+    ClassPathResource cpr = new ClassPathResource(path);
+    StringIntLabelMapOuterClass.StringIntLabelMap.Builder builder = StringIntLabelMapOuterClass.StringIntLabelMap.newBuilder();
+    InputStreamReader reader = new InputStreamReader(cpr.getInputStream(),"ASCII");
+    TextFormat.merge(reader,builder);
+    return builder.build();
   }
 
 }
