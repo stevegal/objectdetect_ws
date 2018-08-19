@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <title>Detection</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<p>
+    <img src="data:image/png;base64" th:src="*{'data:image/jpg;base64,'+image}"/>
+</p>
+ <table>
+     <tr> <td>Thing Found</td><td>Confidence (1)</td></tr>
+     <th:block th:each="result : ${results}">
+         <tr><td th:text="${result.getLabel()}"></td><td th:text="${result.getConfidence()}"></td></tr>
+     </th:block>
+ </table>
+</body>
+</html>

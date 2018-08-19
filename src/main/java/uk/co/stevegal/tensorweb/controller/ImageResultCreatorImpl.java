@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -33,6 +34,8 @@ public class ImageResultCreatorImpl implements ImageResultCreator {
       graphics.drawString(result.getLabel(),startX+5, startY+10);
     }
     graphics.dispose();
-    return Base64.getEncoder().encodeToString(((DataBufferByte)image.getData().getDataBuffer()).getData());
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    ImageIO.write(image,"jpg",baos);
+    return Base64.getEncoder().encodeToString(baos.toByteArray());
   }
 }

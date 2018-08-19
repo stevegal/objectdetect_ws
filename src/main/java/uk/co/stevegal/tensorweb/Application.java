@@ -8,11 +8,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.util.FileCopyUtils;
 import org.tensorflow.Graph;
+import org.thymeleaf.TemplateEngine;
 import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreatorImpl;
+import uk.co.stevegal.tensorweb.controller.MailClient;
 import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 
 import java.io.IOException;
@@ -57,6 +61,12 @@ public class Application {
   @Bean
   public ImageResultCreator imageResultCreator(){
     return new ImageResultCreatorImpl();
+  }
+
+
+  @Bean
+  public MailClient mailClient(JavaMailSender sender, TemplateEngine engine) {
+    return new MailClient(sender, engine);
   }
 
 }
