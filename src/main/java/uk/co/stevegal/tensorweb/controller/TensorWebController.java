@@ -1,5 +1,7 @@
 package uk.co.stevegal.tensorweb.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 @RestController("/detect")
 public class TensorWebController {
 
+  Logger logger = LoggerFactory.getLogger(TensorWebController.class);
+
   private ImageEvaluator evaluator;
   private ImageResultCreator imageResultCreator;
   private MailClient mailClient;
@@ -40,10 +44,13 @@ public class TensorWebController {
 
   @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public PredictionResults predictFileUpload(@RequestParam("image") MultipartFile file) throws IOException {
+    logger.info("starting prediction ");
     PredictionResults unfilteredResults = this.evaluator.evaluate(file.getBytes());
+    logger.info("prediction done - results"+unfilteredResults.getResults().size());
     List<PredictionResult> predictionResults = unfilteredResults.asStream()
         .filter(item -> item.getConfidence() > confidence)
         .collect(Collectors.toList());
+    logger.info("filtered - results"+predictionResults.size());
     String encodedImage = imageResultCreator.createResultImage(file.getBytes(),predictionResults);
     return PredictionResults.newBuilder().results(predictionResults).image(encodedImage).build();
   }
@@ -63,7 +70,8 @@ public class TensorWebController {
   public void mailIfResult(@RequestParam("image") MultipartFile file,@RequestParam("mailTo") String mailTo) throws IOException {
     PredictionResults results = this.predictFileUpload(file);
     if (!results.getResults().isEmpty()) {
-      this.mailClient.sendResultsTo(mailTo, results);
+      logger.info("sending email");
+//      this.mailClient.sendResultsTo(mailTo, results);
     }
   }
 

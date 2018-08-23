@@ -34,7 +34,7 @@ public class MailClient {
       context.setVariable("image", results.getImage());
       context.setVariable("results", results.getResults());
       String content = engine.process("pretty",context);
-      messageHelper.setText(content);
+      messageHelper.setText(content, true);
     };
     mailSender.send(messagePreparator);
   }

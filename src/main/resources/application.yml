@@ -12,3 +12,4 @@ tensor:
   labelPath: mscoco_label_map.pbtxt
   modelPath: frozen_inference_graph.pb
   confidenceLimit: 0.2
+  maxPoolSize: 5

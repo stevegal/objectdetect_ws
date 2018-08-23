@@ -3,3 +3,5 @@ target/**
 .idea/**/*
 
 **/*.pb
+
+src/main/resources/application.yml

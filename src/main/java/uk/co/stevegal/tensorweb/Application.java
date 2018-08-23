@@ -10,15 +10,19 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.util.FileCopyUtils;
 import org.tensorflow.Graph;
+import org.tensorflow.Session;
 import org.thymeleaf.TemplateEngine;
 import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreatorImpl;
 import uk.co.stevegal.tensorweb.controller.MailClient;
 import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
+import uk.co.stevegal.tensorweb.controller.TerminationBean;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by stevegal on 18/08/2018.
@@ -42,8 +46,22 @@ public class Application {
   }
 
   @Bean
-  public ImageEvaluator machineEvaluator(Graph graph, StringIntLabelMapOuterClass.StringIntLabelMap map) {
-    return new TensorflowImageEvaluator(graph, map);
+  public TerminationBean terminationBean(BlockingQueue<Session> sessions) {
+    return new TerminationBean(sessions);
+  }
+
+  @Bean
+  public BlockingQueue<Session> sessionQueue(@Value("${tensor.maxPoolSize}") int maxPoolSize, Graph graph ) {
+    BlockingQueue<Session> sessions = new ArrayBlockingQueue<>(maxPoolSize);
+    for (int i=0;i<maxPoolSize;i++) {
+      sessions.add(new Session(graph));
+    }
+    return sessions;
+  }
+
+  @Bean
+  public ImageEvaluator machineEvaluator(BlockingQueue<Session> sessions, StringIntLabelMapOuterClass.StringIntLabelMap map) {
+    return new TensorflowImageEvaluator(sessions, map);
   }
 
   @Bean
