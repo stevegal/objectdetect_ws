@@ -1,6 +1,8 @@
 # objectdetect_ws
 web service: java object detection using tensor flow
 
+Note the first N runs will be slow as it initializes each of the new sessions and runs through the model, but after that it will fly
+
 # Note's
 bring in frozen model from [model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md) -
 a set of pretrained models. copy in the frozen_inference_graph from the model you want to try
