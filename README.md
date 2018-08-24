@@ -32,6 +32,11 @@ tensor:
   modelPath: frozen_inference_graph.pb
   confidenceLimit: 0.4
   maxPoolSize: 5
+  include:
+    - dog
+    - cat
+    - person
+    - car
   ```
 If you build it, you can run the server with
 ```bash
