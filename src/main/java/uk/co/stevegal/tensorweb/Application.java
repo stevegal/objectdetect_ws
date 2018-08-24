@@ -16,6 +16,7 @@ import uk.co.stevegal.tensorweb.controller.ImageEvaluator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreator;
 import uk.co.stevegal.tensorweb.controller.ImageResultCreatorImpl;
 import uk.co.stevegal.tensorweb.controller.MailClient;
+import uk.co.stevegal.tensorweb.controller.TensorProperties;
 import uk.co.stevegal.tensorweb.controller.TensorflowImageEvaluator;
 import uk.co.stevegal.tensorweb.controller.TerminationBean;
 
@@ -38,9 +39,9 @@ public class Application {
 
   // load in the pre-trained model here (.pb extension)
   @Bean
-  public Graph objectGraph(@Value("${tensor.modelpath}") String path) throws IOException {
+  public Graph objectGraph(TensorProperties properties) throws IOException {
     Graph graph = new Graph();
-    ClassPathResource cpr = new ClassPathResource(path);
+    ClassPathResource cpr = new ClassPathResource(properties.getModelPath());
     graph.importGraphDef(FileCopyUtils.copyToByteArray(cpr.getInputStream()));
     return graph;
   }
@@ -51,9 +52,9 @@ public class Application {
   }
 
   @Bean
-  public BlockingQueue<Session> sessionQueue(@Value("${tensor.maxPoolSize}") int maxPoolSize, Graph graph ) {
-    BlockingQueue<Session> sessions = new ArrayBlockingQueue<>(maxPoolSize);
-    for (int i=0;i<maxPoolSize;i++) {
+  public BlockingQueue<Session> sessionQueue(TensorProperties properties, Graph graph ) {
+    BlockingQueue<Session> sessions = new ArrayBlockingQueue<>(properties.getMaxPoolSize());
+    for (int i=0;i<properties.getMaxPoolSize();i++) {
       sessions.add(new Session(graph));
     }
     return sessions;
@@ -65,8 +66,8 @@ public class Application {
   }
 
   @Bean
-  public StringIntLabelMapOuterClass.StringIntLabelMap mapFrom(@Value("${tensor.labelPath}") String path) throws IOException {
-    ClassPathResource cpr = new ClassPathResource(path);
+  public StringIntLabelMapOuterClass.StringIntLabelMap mapFrom(TensorProperties properties) throws IOException {
+    ClassPathResource cpr = new ClassPathResource(properties.getLabelPath());
     StringIntLabelMapOuterClass.StringIntLabelMap.Builder builder = StringIntLabelMapOuterClass.StringIntLabelMap.newBuilder();
     InputStreamReader reader = new InputStreamReader(cpr.getInputStream(),"ASCII");
     TextFormat.merge(reader,builder);

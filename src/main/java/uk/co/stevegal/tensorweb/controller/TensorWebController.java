@@ -32,14 +32,19 @@ public class TensorWebController {
   private ImageResultCreator imageResultCreator;
   private MailClient mailClient;
   private float confidence;
+  private List<String> includeLabels;
 
 
   @Autowired
-  public TensorWebController(ImageEvaluator evaluator, ImageResultCreator imageResultCreator, MailClient mailClient,@Value("${tensor.confidenceLimit}") float confidence) {
+  public TensorWebController(ImageEvaluator evaluator,
+                             ImageResultCreator imageResultCreator,
+                             MailClient mailClient,
+                             TensorProperties properties) {
     this.evaluator = evaluator;
     this.imageResultCreator = imageResultCreator;
     this.mailClient = mailClient;
-    this.confidence = confidence;
+    this.confidence = properties.getConfidenceLimit();
+    this.includeLabels = properties.getInclude();
   }
 
   @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,7 +53,7 @@ public class TensorWebController {
     PredictionResults unfilteredResults = this.evaluator.evaluate(file.getBytes());
     logger.info("prediction done - results"+unfilteredResults.getResults().size());
     List<PredictionResult> predictionResults = unfilteredResults.asStream()
-        .filter(item -> item.getConfidence() > confidence)
+        .filter(item -> item.getConfidence() > confidence).filter(item -> includeLabels.contains(item.getLabel()))
         .collect(Collectors.toList());
     logger.info("filtered - results"+predictionResults.size());
     String encodedImage = imageResultCreator.createResultImage(file.getBytes(),predictionResults);
@@ -71,7 +76,7 @@ public class TensorWebController {
     PredictionResults results = this.predictFileUpload(file);
     if (!results.getResults().isEmpty()) {
       logger.info("sending email");
-//      this.mailClient.sendResultsTo(mailTo, results);
+      this.mailClient.sendResultsTo(mailTo, results);
     }
   }
 

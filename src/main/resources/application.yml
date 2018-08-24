@@ -9,6 +9,13 @@ spring:
       max-file-size: 2MB
 
 tensor:
+  include:
+    - car
+    - person
+    - bicycle
+    - motorcycle
+    - cat
+    - dog
   labelPath: mscoco_label_map.pbtxt
   modelPath: frozen_inference_graph.pb
   confidenceLimit: 0.2

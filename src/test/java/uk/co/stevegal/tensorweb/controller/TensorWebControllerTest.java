@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-@SpringBootTest(properties = {"tensor.confidenceLimit=0.15"})
+@SpringBootTest(properties= {"tensor.confidenceLimit=0.15","tensor.include=car"})
 @Import(TensorWebControllerTest.CustomConfiguration.class)
 public class TensorWebControllerTest {
 
@@ -114,7 +114,7 @@ public class TensorWebControllerTest {
             PredictionResult.newBuilder().confidence(0.1f).label("car").build()
         )
         .result(
-            PredictionResult.newBuilder().confidence(0.2f).label("car2").build()
+            PredictionResult.newBuilder().confidence(0.2f).label("car").build()
         )
         .build();
     when(mockEvaluator.evaluate(any(byte[].class))).thenReturn(fakeResults);
@@ -126,14 +126,14 @@ public class TensorWebControllerTest {
         .andExpect(jsonPath("$.results").isArray())
         .andExpect(jsonPath("$.results.length()").value(equalTo(1)))
         .andExpect(jsonPath("$.results[0].confidence").value(closeTo(0.2,0.01)))
-        .andExpect(jsonPath("$.results[0].label").value(equalTo("car2")))
+        .andExpect(jsonPath("$.results[0].label").value(equalTo("car")))
         .andExpect(jsonPath("$.image").value(equalTo("12345")));
 
     verify(mockEvaluator).evaluate("Spring Framework".getBytes());
     ArgumentCaptor<List<PredictionResult>> resultArgumentCaptor = ArgumentCaptor.forClass(List.class);
     verify(mockImageResult).createResultImage(eq("Spring Framework".getBytes()),resultArgumentCaptor.capture());
     assertThat(resultArgumentCaptor.getValue()).hasSize(1);
-    assertThat(resultArgumentCaptor.getValue().get(0).getLabel()).isEqualTo("car2");
+    assertThat(resultArgumentCaptor.getValue().get(0).getLabel()).isEqualTo("car");
   }
 
   @Test
@@ -143,7 +143,7 @@ public class TensorWebControllerTest {
 
     PredictionResults fakeResults = PredictionResults.newBuilder()
         .result(
-            PredictionResult.newBuilder().confidence(10.0f).label("wibble").build()
+            PredictionResult.newBuilder().confidence(10.0f).label("car").build()
         ).build();
     when(mockEvaluator.evaluate(any(byte[].class))).thenReturn(fakeResults);
     when(mockImageResult.createResultImage(any(byte[].class), any(List.class))).thenReturn("abcde");
@@ -156,7 +156,7 @@ public class TensorWebControllerTest {
     ArgumentCaptor<PredictionResults> resultArgumentCaptor = ArgumentCaptor.forClass(PredictionResults.class);
     verify(mockMailClient).sendResultsTo(eq("steve"),resultArgumentCaptor.capture());
     assertThat(resultArgumentCaptor.getValue().getResults()).hasSize(1);
-    assertThat(resultArgumentCaptor.getValue().getResults().get(0).getLabel()).isEqualTo("wibble");
+    assertThat(resultArgumentCaptor.getValue().getResults().get(0).getLabel()).isEqualTo("car");
 
   }
 
@@ -177,6 +177,33 @@ public class TensorWebControllerTest {
     verify(mockEvaluator).evaluate("Spring Framework".getBytes());
     ArgumentCaptor<PredictionResults> resultArgumentCaptor = ArgumentCaptor.forClass(PredictionResults.class);
     verifyNoMoreInteractions(mockMailClient);
+  }
+
+  @Test
+  public void willOnlyIncludeObjectsInFilterOnMail() throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile("image", "test.image",
+        "image/jpg", "Spring Framework".getBytes());
+
+    PredictionResults fakeResults = PredictionResults.newBuilder()
+        .result(
+            PredictionResult.newBuilder().confidence(0.8f).label("not_included").build()
+        )
+        .result(
+            PredictionResult.newBuilder().confidence(0.9f).label("car").build()
+        )
+        .build();
+    when(mockEvaluator.evaluate(any(byte[].class))).thenReturn(fakeResults);
+    when(mockImageResult.createResultImage(any(byte[].class), any(List.class))).thenReturn("12345");
+
+
+    this.mockMvc.perform(multipart("/detect/mailTo").file(multipartFile).param("mailTo","steve"))
+        .andExpect(status().isOk());
+
+    verify(mockEvaluator).evaluate("Spring Framework".getBytes());
+    ArgumentCaptor<PredictionResults> resultArgumentCaptor = ArgumentCaptor.forClass(PredictionResults.class);
+    verify(mockMailClient).sendResultsTo(eq("steve"),resultArgumentCaptor.capture());
+    assertThat(resultArgumentCaptor.getValue().getResults()).hasSize(1);
+    assertThat(resultArgumentCaptor.getValue().getResults().get(0).getLabel()).isEqualTo("car");
   }
 
   @TestConfiguration
