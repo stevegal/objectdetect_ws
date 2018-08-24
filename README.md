@@ -3,7 +3,11 @@ web service: java object detection using tensor flow
 
 Note the first N runs will be slow as it initializes each of the new sessions and runs through the model, but after that it will fly
 
-It's a spring boot app and you can tweak the settings using the properties file
+It's a spring boot app and you can tweak the settings using the properties file. Normal control of mail server (example below id for google)
+I've allowed up to 2MB in the file uploader in the example below. Change to suit.
+
+I've also filtered out results based on confidence level and label and that controlled from the properties as well
+
 
 ```yaml
 server:
