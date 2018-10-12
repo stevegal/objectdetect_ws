@@ -56,9 +56,16 @@ make sure you copy in the labels from
 ```properties
 object_detection/data/mscoco_label_map.pbtxt
 ```
-
+into the resources folder of this project before build
 
 use ```protoc``` to generate src code from models to read in the labels:
+
+Note you must be in the research branch of the tensorflow models you have just checked out for this to work.
+If you haven't installed protoc then
+```bash
+brew install protobuf
+```
+should do the trick!
 
 e.g
 ```bash
